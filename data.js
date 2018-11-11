@@ -22,3 +22,11 @@ async function load_ddm30_basins(select_basin) {
     }
   });
 }
+
+async function get_basin_wiki(object = window) {
+  const response = await fetch("basin_wiki.csv");
+  const text = await response.text();
+  object["basin_wiki"] = await text
+    .split("\n")
+    .map(line => line.split(",").map(cell => cell.replace(/"/g, "")));
+}

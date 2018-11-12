@@ -26,13 +26,37 @@ async function fetch_overpass(url) {
 async function fetch_overpass_wikidata(QID) {
   if (typeof QID == "string") {
     url = `https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A(%0A%20%20node%5B%22wikidata%22%3D%22${QID}%22%5D%3B%0A%20%20way%5B%22wikidata%22%3D%22${QID}%22%5D%3B%0A%20%20relation%5B%22wikidata%22%3D%22${QID}%22%5D%3B%0A)%3B%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B&target=compact`;
+    return fetch_overpass(url);
   } else {
-    QIDquery = QID.map(x => `relation[wikidata=${x}];way[wikidata=${x}];`).join(
-      ""
+    // https://stackoverflow.com/questions/8495687/split-array-into-chunks
+    const perChunk = 60;
+    const QIDqueries = QID.reduce((all, one, i) => {
+      const ch = Math.floor(i / perChunk);
+      const query = `relation[wikidata=${one}];way[wikidata=${one}];`;
+      all[ch] = (all[ch] || "") + query;
+      return all;
+    }, []);
+    const urls = QIDqueries.map(
+      QIDquery =>
+        `https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A(${QIDquery})%3B%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B&target=compact`
     );
-    url = `https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A25%5D%3B%0A(${QIDquery})%3B%0Aout%20body%3B%0A%3E%3B%0Aout%20skel%20qt%3B&target=compact`;
+    // https://stackoverflow.com/questions/47003789/es6-promises-with-timeout-interval
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    var geojson_array = [];
+    for (let i = 0; i < urls.length; i++) {
+      const geojson = await wait(i == 0 ? 0 : 1000).then(() =>
+        fetch_overpass(urls[i])
+      );
+      await geojson_array.push(geojson);
+    }
+
+    return {
+      type: "FeatureCollection",
+      features: geojson_array
+        .map(x => x.features)
+        .reduce((all, one) => all.concat(one))
+    };
   }
-  return fetch_overpass(url);
 }
 
 async function fetch_wikidata_tributaries(QID) {

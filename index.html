@@ -13,6 +13,7 @@
       integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
       crossorigin=""
     ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-polylinedecorator/1.1.0/leaflet.polylineDecorator.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
 
     <script src="js/osmtogeojson.js"></script>
@@ -39,10 +40,11 @@
     <div id="map"></div>
 
     <script>
-      get_basin_wiki();
-
       var map = L.map("map").fitWorld();
       var mapLayers = new Layers(map);
+
+      get_basin_wiki();
+      fetch_ddm30_lines(mapLayers);
 
       // create the tile layer with correct attribution
       // https://switch2osm.org/using-tiles/getting-started-with-leaflet/
@@ -71,6 +73,8 @@
             layer.addTo(map, "Tributaries")
           );
         }
+
+        load_basin_ddm(mapLayers,basin_id);
 
         var selectedBasinsStyle = {
           color: "orange",

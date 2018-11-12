@@ -74,24 +74,16 @@
           );
         }
 
-        load_basin_ddm(mapLayers,basin_id);
+        load_basin_ddm(mapLayers, basin_id);
 
-        var selectedBasinsStyle = {
-          color: "orange",
-          weight: 3,
-          opacity: 0.65,
-          fill: false
-        };
+        updateSelectionLabel(basin_id, wiki);
 
-        const layer_selected_basin = L.geoJson(mapLayers.data.basins, {
-          style: selectedBasinsStyle,
-          filter: feature => feature.properties.basin_id == basin_id
-        });
-        mapLayers.add(layer_selected_basin, "Selected basin");
-        map.fitBounds(layer_selected_basin.getBounds());
+        highlightSelectedBasin(mapLayers, basin_id);
       }
 
       load_ddm30_basins(mapLayers, select_basin);
+
+      setupSelectionLabel(map);
     </script>
   </body>
 </html>

@@ -78,3 +78,55 @@ async function get_basin_wiki(object = window) {
     .split("\n")
     .map(line => line.split(",").map(cell => cell.replace(/"/g, "")));
 }
+
+function highlightSelectedBasin(mapLayers, basin_id) {
+  var selectedBasinsStyle = {
+    color: "orange",
+    weight: 3,
+    opacity: 0.65,
+    fill: false
+  };
+
+  const layer_selected_basin = L.geoJson(mapLayers.data.basins, {
+    style: selectedBasinsStyle,
+    filter: feature => feature.properties.basin_id == basin_id
+  });
+  mapLayers.add(layer_selected_basin, "Selected basin");
+  mapLayers.map.fitBounds(layer_selected_basin.getBounds());
+}
+
+function setupSelectionLabel(map) {
+  L.Control.SelectionLabel = L.Control.extend({
+    onAdd: function(map) {
+      var div = L.DomUtil.create("div");
+      div.setAttribute(
+        "style",
+        `
+        font-size: 16px;
+        background-color: white;
+        height: 80px;
+        width: 200px;
+        padding: 5px;
+      `
+      );
+      div.innerHTML = `Basin ID: <input id=basin style="font-size:16px" onChange="select_basin(document.getElementById('basin').value)" size=6></input><div id=wiki></div>`;
+      return div;
+    },
+    onRemove: function(map) {
+      // Nothing to do here
+    }
+  });
+  var selection_label = new L.Control.SelectionLabel({
+    position: "topright"
+  }).addTo(map);
+}
+
+function updateSelectionLabel(basin_id, wiki) {
+  document.getElementById("basin").value = basin_id;
+
+  const wikilabel =
+    wiki != null && wiki != ""
+      ? ` (<a href='http://en.wikipedia.org/wiki/${wiki}' target=_blank>${wiki}</a>)`
+      : " (unknown wikipedia page)";
+  document.getElementById("wiki").innerHTML = wikilabel;
+}

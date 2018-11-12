@@ -26,6 +26,24 @@ async function load_ddm30_basins(mapLayers, select_basin) {
     }),
     "Basins"
   );
+
+  const basins_missing_wiki = await L.geoJson(basins, {
+    style: {
+      color: "red",
+      weight: 0,
+      fillOpacity: 0.5,
+      interactive: false
+    },
+    filter: function(feature, layer) {
+      var wiki = basin_wiki.filter(x => x[0] == feature.properties.basin_id);
+      return wiki == null || wiki.length == 0;
+    }
+  });
+  mapLayers.basins_missing_wiki = basins_missing_wiki;
+
+  L.control
+    .layers({}, { "Missing wiki": basins_missing_wiki })
+    .addTo(mapLayers.map);
 }
 
 async function fetch_ddm30_lines(mapLayers) {

@@ -36,8 +36,8 @@ async function load_wiwosm_wiki(lang, article, tooltipOptions = {}) {
         layer.on("click", function(e) {
           url =
             lang == "wikidata"
-              ? `http://www.wikidata.org/entity/${article}`
-              : `http://${lang}.wikipedia.org/wiki/${article}`;
+              ? `https://www.wikidata.org/entity/${article}`
+              : `https://${lang}.wikipedia.org/wiki/${article}`;
           window.open(url, "_blank");
         });
       }
@@ -113,7 +113,7 @@ function jsonp(uri) {
 async function load_tributaries_wiki(article) {
   if (typeof article === "undefined") return 0;
   if (article === null) return 0;
-  const url = `http://www.wikidata.org/w/api.php?action=wbgetentities&titles=${encodeURI(
+  const url = `https://www.wikidata.org/w/api.php?action=wbgetentities&titles=${encodeURI(
     article
   )}&sites=enwiki&props=sitelinks&sitefilter=enwiki&format=json&normalize=true`;
   const data = await jsonp(url);

@@ -2,7 +2,7 @@
 // <script src="osmtogeojson.js"></script>
 
 async function fetch_wiwosm_wiki(lang, article) {
-  url = `http://tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang=${lang}&article=${article}`;
+  url = `https://tools.wmflabs.org/wiwosm/osmjson/getGeoJSON.php?lang=${lang}&article=${article}`;
   try {
     const response = await fetch(url);
     return await response.json();

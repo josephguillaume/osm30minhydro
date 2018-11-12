@@ -94,7 +94,7 @@ load_basin_ddm = function(mapLayers, basin_id) {
 async function get_basin_wiki(object = window) {
   const response = await fetch("basin_wiki.csv");
   const text = await response.text();
-  object["basin_wiki"] = await text
+  return await text
     .split("\n")
     .map(line => line.split(",").map(cell => cell.replace(/"/g, "")));
 }
@@ -125,11 +125,11 @@ function setupSelectionLabel(map) {
         font-size: 16px;
         background-color: white;
         height: 80px;
-        width: 200px;
+        width: 400px;
         padding: 5px;
       `
       );
-      div.innerHTML = `Basin ID: <input id=basin style="font-size:16px" onChange="select_basin(document.getElementById('basin').value)" size=6></input>
+      div.innerHTML = `River basin: <input id=basin style="font-size:16px" onChange="select_basin(document.getElementById('basin').value)" size=20></input>
       <div id=wiki></div>
       Min stream order: <input id="strahler_min" type="number" value=1 style="width: 3em" title="Minimum Strahler number"
         onChange="mapLayers.basin_min_strahler=document.getElementById('strahler_min').value;load_basin_ddm(mapLayers,mapLayers.selected_basin_id);" size=3></input>`;
@@ -142,6 +142,13 @@ function setupSelectionLabel(map) {
   var selection_label = new L.Control.SelectionLabel({
     position: "topright"
   }).addTo(map);
+
+  var input = document.getElementById("basin");
+  new Awesomplete(input, {
+    list: basin_wiki
+      .map(x => [x[1], x[0]])
+      .concat(basin_wiki.map(x => [x[0], x[0]]))
+  });
 }
 
 function updateSelectionLabel(basin_id, wiki) {

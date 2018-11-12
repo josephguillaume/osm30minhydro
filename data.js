@@ -65,7 +65,9 @@ load_basin_ddm = function(mapLayers, basin_id) {
 
   layer_ddmLines_cells_line = L.geoJson(mapLayers.data.ddm_lines_cells, {
     style: ddmLinesStyle,
-    filter: (feature, layer) => feature.properties.basin == basin_id
+    filter: (feature, layer) =>
+      feature.properties.basin == basin_id &&
+      feature.properties.strahler >= mapLayers.basin_min_strahler
   });
   layer_ddmLines_cells_arrowhead = L.polylineDecorator(
     layer_ddmLines_cells_line.getLayers(),
@@ -127,7 +129,10 @@ function setupSelectionLabel(map) {
         padding: 5px;
       `
       );
-      div.innerHTML = `Basin ID: <input id=basin style="font-size:16px" onChange="select_basin(document.getElementById('basin').value)" size=6></input><div id=wiki></div>`;
+      div.innerHTML = `Basin ID: <input id=basin style="font-size:16px" onChange="select_basin(document.getElementById('basin').value)" size=6></input>
+      <div id=wiki></div>
+      Min stream order: <input id="strahler_min" type="number" value=1 style="width: 3em" title="Minimum Strahler number"
+        onChange="mapLayers.basin_min_strahler=document.getElementById('strahler_min').value;load_basin_ddm(mapLayers,mapLayers.selected_basin_id);" size=3></input>`;
       return div;
     },
     onRemove: function(map) {

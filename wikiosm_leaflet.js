@@ -8,10 +8,17 @@
 class Layers {
   constructor(map) {
     this.map = map;
+    this.data = {};
   }
   add(layer, name) {
     this[name] = layer;
     layer.addTo(this.map);
+  }
+  remove(name) {
+    if (this.hasOwnProperty(name)) {
+      this.map.removeLayer(this[name]);
+      delete this[name];
+    }
   }
 }
 
@@ -79,30 +86,36 @@ async function load_tributaries_overpass(QID) {
 
 // https://stackoverflow.com/questions/6132796/how-to-make-a-jsonp-request-from-javascript-without-jquery
 function jsonp(uri) {
-    return new Promise(function(resolve, reject) {
-        var id = '_' + Math.round(10000 * Math.random());
-        var callbackName = 'jsonp_callback_' + id;
-        window[callbackName] = function(data) {
-            delete window[callbackName];
-            var ele = document.getElementById(id);
-            ele.parentNode.removeChild(ele);
-            resolve(data);
-        }
+  return new Promise(function(resolve, reject) {
+    var id = "_" + Math.round(10000 * Math.random());
+    var callbackName = "jsonp_callback_" + id;
+    window[callbackName] = function(data) {
+      delete window[callbackName];
+      var ele = document.getElementById(id);
+      ele.parentNode.removeChild(ele);
+      resolve(data);
+    };
 
-        var src = uri + '&callback=' + callbackName;
-        var script = document.createElement('script');
-        script.src = src;
-        script.id = id;
-        script.addEventListener('error', reject);
-        (document.getElementsByTagName('head')[0] || document.body || document.documentElement).appendChild(script)
-    });
+    var src = uri + "&callback=" + callbackName;
+    var script = document.createElement("script");
+    script.src = src;
+    script.id = id;
+    script.addEventListener("error", reject);
+    (
+      document.getElementsByTagName("head")[0] ||
+      document.body ||
+      document.documentElement
+    ).appendChild(script);
+  });
 }
 
 // TODO: other than english?
 async function load_tributaries_wiki(article) {
   if (typeof article === "undefined") return 0;
   if (article === null) return 0;
-  const url = `http://www.wikidata.org/w/api.php?action=wbgetentities&titles=${encodeURI(article)}&sites=enwiki&props=sitelinks&sitefilter=enwiki&format=json&normalize=true`;
+  const url = `http://www.wikidata.org/w/api.php?action=wbgetentities&titles=${encodeURI(
+    article
+  )}&sites=enwiki&props=sitelinks&sitefilter=enwiki&format=json&normalize=true`;
   const data = await jsonp(url);
   return await load_tributaries_overpass(Object.keys(data.entities)[0]);
 }

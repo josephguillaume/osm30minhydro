@@ -9,6 +9,10 @@ class Layers {
   constructor(map) {
     this.map = map;
     this.data = {};
+    // TODO: may want to not have controls sometimes?
+    this.layerControl = L.control
+      .layers({}, {}, { position: "bottomright" })
+      .addTo(this.map);
   }
   add(layer, name) {
     this[name] = layer;
@@ -18,6 +22,16 @@ class Layers {
     if (this.hasOwnProperty(name)) {
       this.map.removeLayer(this[name]);
       delete this[name];
+    }
+  }
+  addToControl(layer, name) {
+    this[name] = layer;
+    this.layerControl.addOverlay(layer, name);
+  }
+  removeFromControl(name) {
+    if (this.hasOwnProperty(name)) {
+      this.layerControl.removeLayer(this[name]);
+      this.remove(name);
     }
   }
 }
@@ -120,3 +134,39 @@ async function load_tributaries_wiki(article) {
   return await load_tributaries_overpass(Object.keys(data.entities)[0]);
 }
 // load_tributaries_wiki("Essequibo River").then((layer) => layer.addTo(map));
+
+// https://stackoverflow.com/questions/22536467/how-to-retrieve-latitude-and-longitude-from-geosparqls-wktliteral?rq=1
+wktToLatLng = wkt => [
+  wkt.replace(/^.* ([-]?[0-9\\.]+)[^0-9\\.]*$/, "$1"),
+  wkt.replace(/^[^0-9\\.-]*([-]?[0-9\\.]+) .*$/, "$1")
+];
+
+async function load_wikidata_river_coords(bbox) {
+  const data = await fetch_wikidata_river_coords(bbox);
+
+  const wikidata_riversMarkerOptions = {
+    radius: 4,
+    fillColor: "purple",
+    color: "purple",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+  };
+
+  var points = data.results.bindings.map(x =>
+    L.circleMarker(
+      wktToLatLng(x.coordinates.value),
+      wikidata_riversMarkerOptions
+    )
+      .bindTooltip(x.riverLabel.value)
+      .on("click", () => {
+        // TODO: avoid using variable in global environment
+        load_tributaries_overpass(
+          x.river.value.replace("http://www.wikidata.org/entity/", "")
+        ).then(x => mapLayers.add(x, "wikidata rivers"));
+        window.open(x.river.value, "_blank");
+      })
+  );
+
+  return L.layerGroup(points);
+}

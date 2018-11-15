@@ -41,9 +41,7 @@ async function load_ddm30_basins(mapLayers, select_basin) {
   });
   mapLayers.basins_missing_wiki = basins_missing_wiki;
 
-  L.control
-    .layers({}, { "Missing wiki": basins_missing_wiki })
-    .addTo(mapLayers.map);
+  mapLayers.addToControl(basins_missing_wiki, "Missing wiki");
 }
 
 async function fetch_ddm30_lines(mapLayers) {

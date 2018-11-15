@@ -78,3 +78,22 @@ async function fetch_wikidata_tributaries(QID) {
   );
   return QIDs;
 }
+
+
+// bbox is leaflet bounds: https://leafletjs.com/reference-1.3.4.html#bounds
+async function fetch_wikidata_river_coords(bbox) {
+  const endpointUrl = "https://query.wikidata.org/sparql",
+    sparqlQuery = `SELECT distinct ?river ?riverLabel ?coordinates WHERE {
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+  ?river wdt:P31/wdt:P279* wd:Q4022.
+    SERVICE wikibase:box {
+    ?river wdt:P625 ?coordinates.
+    bd:serviceParam wikibase:cornerNorthEast "Point(${bbox.getNorthEast().lng} ${bbox.getNorthEast().lat})"^^geo:wktLiteral.
+    bd:serviceParam wikibase:cornerSouthWest "Point(${bbox.getSouthWest().lng} ${bbox.getSouthWest().lat})"^^geo:wktLiteral.
+  }
+}`,
+    fullUrl = endpointUrl + "?query=" + encodeURIComponent(sparqlQuery),
+    headers = { Accept: "application/sparql-results+json" };
+
+  return await fetch(fullUrl, { headers }).then(body => body.json());
+}

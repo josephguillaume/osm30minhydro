@@ -77,7 +77,16 @@
         )
           return null;
         mapLayers.remove("Selected basin");
+        // TODO: allow points to accumulate instead?
+        mapLayers.removeFromControl("Wikidata river coordinates");
         mapLayers.selected_basin_id = basin_id;
+
+        var basin_bounds = Object.values(mapLayers.Basins._layers)
+          .filter(x => x.feature.properties.basin_id == basin_id)[0]
+          .getBounds();
+        load_wikidata_river_coords(basin_bounds).then(layer =>
+          mapLayers.addToControl(layer, "Wikidata river coordinates")
+        );
 
         var wiki = basin_wiki.filter(x => x[0] == basin_id);
         // TODO: deal with more than one match

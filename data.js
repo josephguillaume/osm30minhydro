@@ -152,9 +152,18 @@ function setupSelectionLabel(map) {
 function updateSelectionLabel(basin_id, wiki) {
   document.getElementById("basin").value = basin_id;
 
-  const wikilabel =
-    wiki != null && wiki != ""
-      ? ` (<a href='http://en.wikipedia.org/wiki/${wiki}' target=_blank>${wiki}</a>)`
-      : " (unknown wikipedia page)";
+  var wikilabel = " (unknown wikipedia page)";
+  if (Array.isArray(wiki) && wiki.length > 0)
+    wikilabel =
+      "(" +
+      wiki
+        .map(
+          page =>
+            `<a href='http://en.wikipedia.org/wiki/${page}' target=_blank>${page}</a>`
+        )
+        .join(", ") +
+      ")";
+  if (typeof wiki === "string")
+    wikilabel = ` (<a href='http://en.wikipedia.org/wiki/${wiki}' target=_blank>${wiki}</a>)`;
   document.getElementById("wiki").innerHTML = wikilabel;
 }

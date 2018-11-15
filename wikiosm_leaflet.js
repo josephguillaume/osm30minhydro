@@ -125,8 +125,21 @@ function jsonp(uri) {
 
 // TODO: other than english?
 async function load_tributaries_wiki(article) {
-  if (typeof article === "undefined") return 0;
-  if (article === null) return 0;
+  if (typeof article === "undefined" || article === null) return 0;
+
+  if (Array.isArray(article)) {
+    // https://stackoverflow.com/questions/47003789/es6-promises-with-timeout-interval
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    var layer_array = [];
+    for (let i = 0; i < article.length; i++) {
+      const layer = await wait(i == 0 ? 0 : 1000).then(() =>
+        load_tributaries_wiki(article[i])
+      );
+      await layer_array.push(layer);
+    }
+    return await L.layerGroup(layer_array);
+  }
+
   const url = `https://www.wikidata.org/w/api.php?action=wbgetentities&titles=${encodeURI(
     article
   )}&sites=enwiki&props=sitelinks&sitefilter=enwiki&format=json&normalize=true`;

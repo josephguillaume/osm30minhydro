@@ -88,14 +88,7 @@
           mapLayers.addToControl(layer, "Wikidata river coordinates")
         );
 
-        var wiki = basin_wiki.filter(x => x[0] == basin_id);
-        // TODO: deal with more than one match
-        if (wiki != null && wiki.length > 0) {
-          wiki = wiki[0][1];
-        } else {
-          wiki = null;
-        }
-
+        var wiki = basin_wiki.filter(x => x[0] == basin_id).map(x => x[1]);
         if (wiki != null) {
           load_tributaries_wiki(wiki).then(layer =>
             layer.addTo(map, "Tributaries")

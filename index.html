@@ -81,9 +81,12 @@
         mapLayers.removeFromControl("Wikidata river coordinates");
         mapLayers.selected_basin_id = basin_id;
 
-        var basin_bounds = Object.values(mapLayers.Basins._layers)
-          .filter(x => x.feature.properties.basin_id == basin_id)[0]
-          .getBounds();
+        var basin_layer = Object.values(mapLayers.Basins._layers).filter(
+          x => x.feature.properties.basin_id == basin_id
+        )[0];
+        if (typeof basin_layer === "undefined") return null;
+
+        var basin_bounds = basin_layer.getBounds();
         load_wikidata_river_coords(basin_bounds).then(layer =>
           mapLayers.addToControl(layer, "Wikidata river coordinates")
         );

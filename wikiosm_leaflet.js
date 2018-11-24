@@ -123,7 +123,6 @@ function jsonp(uri) {
   });
 }
 
-// TODO: other than english?
 async function load_tributaries_wiki(article) {
   if (typeof article === "undefined" || article === null) return 0;
 
@@ -140,9 +139,12 @@ async function load_tributaries_wiki(article) {
     return await L.layerGroup(layer_array);
   }
 
+  const lang = article.indexOf(":") > -1 ? article.split(":")[0] : "en";
+  article = article.indexOf(":") > -1 ? article.split(":")[1] : article;
+
   const url = `https://www.wikidata.org/w/api.php?action=wbgetentities&titles=${encodeURI(
     article
-  )}&sites=enwiki&props=sitelinks&sitefilter=enwiki&format=json&normalize=true`;
+  )}&sites=${lang}wiki&props=sitelinks&sitefilter=enwiki&format=json&normalize=true`;
   const data = await jsonp(url);
   return await load_tributaries_overpass(Object.keys(data.entities)[0]);
 }

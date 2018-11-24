@@ -156,16 +156,16 @@ function updateSelectionLabel(basin_id, wiki) {
   document.getElementById("basin").value = basin_id;
 
   var wikilabel = " (unknown wikipedia page)";
+  getWikiLink = article => {
+    const lang = article.indexOf(":") > -1 ? article.split(":")[0] : "en";
+    article = article.indexOf(":") > -1 ? article.split(":")[1].trim() : article.trim();
+
+    var link = `<a href='http://${lang}.wikipedia.org/wiki/${article}' target=_blank>${article}</a>`;
+    link = link + (lang == "en" ? "" : ` (${lang})`);
+    return link;
+  };
   if (Array.isArray(wiki) && wiki.length > 0)
-    wikilabel =
-      "(" +
-      wiki
-        .map(
-          page =>
-            `<a href='http://en.wikipedia.org/wiki/${page}' target=_blank>${page}</a>`
-        )
-        .join(", ") +
-      ")";
+    wikilabel = "(" + wiki.map(getWikiLink).join(", ") + ")";
   if (wiki.length > 0 && /^\s*$/.test(wiki[0]))
     wikilabel = "No visible watercourse";
   if (typeof wiki === "string")

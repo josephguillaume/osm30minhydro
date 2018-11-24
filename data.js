@@ -147,6 +147,9 @@ function setupSelectionLabel(map) {
       .map(x => [x[1], x[0]])
       .concat(basin_wiki.map(x => [x[0], x[0]]))
   });
+  input.addEventListener("awesomplete-select", event =>
+    select_basin(event.text.value)
+  );
 }
 
 function updateSelectionLabel(basin_id, wiki) {

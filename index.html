@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
@@ -15,6 +16,7 @@
     ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-polylinedecorator/1.1.0/leaflet.polylineDecorator.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
+    <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.3/awesomplete.min.css"
@@ -81,7 +83,7 @@
         mapLayers.removeFromControl("Wikidata river coordinates");
         mapLayers.selected_basin_id = basin_id;
 
-        var basin_layer = Object.values(mapLayers.Basins._layers).filter(
+        var basin_layer = Object.values(mapLayers.Basins_orig._layers).filter(
           x => x.feature.properties.basin_id == basin_id
         )[0];
         if (typeof basin_layer === "undefined") return null;

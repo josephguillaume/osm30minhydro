@@ -1,10 +1,13 @@
 async function load_ddm30_basins(mapLayers, select_basin) {
   const response = await fetch("data/ddm30_basins.topojson");
   const basins_topojson = await response.json();
+  mapLayers.data.basins_topojson = basins_topojson;
+
   const basins = await topojson.feature(
     basins_topojson,
     basins_topojson.objects.basins
   );
+  mapLayers.data.basins = await basins;
 
   const subbasinsStyle = {
     color: "grey",
@@ -13,32 +16,57 @@ async function load_ddm30_basins(mapLayers, select_basin) {
     fillOpacity: 0.05 // needed to allow clicking
   };
 
-  mapLayers.data.basins = await basins;
+  // TODO: this is just to get bounding boxes on basins
+  mapLayers.Basins_orig = await L.geoJson(basins, {
+    style: subbasinsStyle,
+    onEachFeature: function(feature, layer) {
+      layer.on("click", function(e) {
+        select_basin(e.target.feature.properties.basin_id);
+      });
+    }
+  });
 
   await mapLayers.add(
-    L.geoJson(basins, {
-      style: subbasinsStyle,
-      onEachFeature: function(feature, layer) {
-        layer.on("click", function(e) {
-          select_basin(e.target.feature.properties.basin_id);
-        });
-      }
-    }),
+    L.vectorGrid
+      .slicer(basins_topojson, {
+        rendererFactory: L.canvas.tile,
+        vectorTileLayerStyles: {
+          basins: subbasinsStyle
+        },
+        interactive: true,
+        getFeatureId: f => f.properties.basin_id
+      })
+      .on("click", e => select_basin(e.layer.properties.basin_id)),
     "Basins"
   );
 
-  const basins_missing_wiki = await L.geoJson(basins, {
-    style: {
-      color: "red",
-      weight: 0,
-      fillOpacity: 0.5,
-      interactive: false
+  // TODO: add a control that toggles style of Basins layer instead?
+  const basins_missing_wiki = await L.vectorGrid.slicer(basins_topojson, {
+    rendererFactory: L.canvas.tile,
+    vectorTileLayerStyles: {
+      basins: properties => {
+        // TODO: use proper filtering instead
+        // https://github.com/Leaflet/Leaflet.VectorGrid/issues/153
+        const wiki = basin_wiki.filter(x => x[0] == properties.basin_id);
+        return wiki == null || wiki.length == 0
+          ? {
+              color: "red",
+              weight: 0,
+              fillOpacity: 0.5
+            }
+          : {
+              fillOpacity: 0,
+              stroke: false,
+              fill: false,
+              opacity: 0,
+              weight: 0
+            };
+      }
     },
-    filter: function(feature, layer) {
-      var wiki = basin_wiki.filter(x => x[0] == feature.properties.basin_id);
-      return wiki == null || wiki.length == 0;
-    }
+    interactive: false,
+    getFeatureId: f => f.properties.basin_id
   });
+
   mapLayers.basins_missing_wiki = basins_missing_wiki;
 
   mapLayers.addToControl(basins_missing_wiki, "Missing wiki");
@@ -158,7 +186,8 @@ function updateSelectionLabel(basin_id, wiki) {
   var wikilabel = " (unknown wikipedia page)";
   getWikiLink = article => {
     const lang = article.indexOf(":") > -1 ? article.split(":")[0] : "en";
-    article = article.indexOf(":") > -1 ? article.split(":")[1].trim() : article.trim();
+    article =
+      article.indexOf(":") > -1 ? article.split(":")[1].trim() : article.trim();
 
     var link = `<a href='http://${lang}.wikipedia.org/wiki/${article}' target=_blank>${article}</a>`;
     link = link + (lang == "en" ? "" : ` (${lang})`);

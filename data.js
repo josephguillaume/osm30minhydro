@@ -166,6 +166,8 @@ function updateSelectionLabel(basin_id, wiki) {
         )
         .join(", ") +
       ")";
+  if (wiki.length > 0 && /^\s*$/.test(wiki[0]))
+    wikilabel = "No visible watercourse";
   if (typeof wiki === "string")
     wikilabel = ` (<a href='http://en.wikipedia.org/wiki/${wiki}' target=_blank>${wiki}</a>)`;
   document.getElementById("wiki").innerHTML = wikilabel;

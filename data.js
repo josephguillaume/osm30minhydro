@@ -50,7 +50,8 @@ async function load_ddm30_basins(mapLayers, select_basin) {
         const wiki = basin_wiki.filter(x => x[0] == properties.basin_id);
         return wiki == null || wiki.length == 0
           ? {
-              color: "red",
+              fill: true,
+              fillColor: "red",
               weight: 0,
               fillOpacity: 0.5
             }

@@ -63,8 +63,12 @@
       // create the tile layer with correct attribution
       // https://switch2osm.org/using-tiles/getting-started-with-leaflet/
       var osmUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+      openCurrentView = (e) => {
+        window.open(`https://www.openstreetmap.org/#map=${map.getZoom()}/${map.getCenter().lat}/${map.getCenter().lng}`,"_blank");
+        e.preventDefault();
+      }
       var osmAttrib =
-        'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
+        'Map data © <a href="https://openstreetmap.org" onClick="openCurrentView(event);">OpenStreetMap</a> contributors';
       var osm = L.tileLayer(osmUrl, {
         minZoom: 0,
         maxZoom: 12,

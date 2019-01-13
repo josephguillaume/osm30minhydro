@@ -86,6 +86,8 @@ async function fetch_wikidata_river_coords(bbox) {
     sparqlQuery = `SELECT distinct ?river ?riverLabel ?coordinates WHERE {
   SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
   ?river wdt:P31/wdt:P279* wd:Q4022.
+  ?sitelink schema:about ?river.
+  FILTER(!REGEX(STR(?sitelink), "ceb.wikipedia.org/wiki/")) .
     SERVICE wikibase:box {
     ?river wdt:P625 ?coordinates.
     bd:serviceParam wikibase:cornerNorthEast "Point(${bbox.getNorthEast().lng} ${bbox.getNorthEast().lat})"^^geo:wktLiteral.

@@ -152,8 +152,10 @@
           isNaN(basin_id) &&
           !isBasinKnown(basin_id)
         ) {
+          showLoading("block");
           load_tributaries_wiki(basin_id).then(layer => {
             layer.addTo(map, "Tributaries");
+            showLoading("none");
             map.fitBounds(layer.getBounds());
           });
         }
@@ -180,9 +182,11 @@
 
         var wiki = basin_wiki.filter(x => x[0] == basin_id).map(x => x[1]);
         if (!(wiki === null || !wiki[0] || /^\s*$/.test(wiki[0]))) {
-          load_tributaries_wiki(wiki).then(layer =>
-            layer.addTo(map, "Tributaries")
-          );
+          showLoading("block");
+          load_tributaries_wiki(wiki).then(layer => {
+            layer.addTo(map, "Tributaries");
+            showLoading("none");
+          });
         }
 
         load_basin_ddm(mapLayers, basin_id);

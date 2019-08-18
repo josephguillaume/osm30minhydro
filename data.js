@@ -152,7 +152,8 @@ function setupSelectionLabel(map) {
         font-size: 16px;
         background-color: white;
         height: 80px;
-        width: 400px;
+        max-width: 400px;
+        width: 100%;
         padding: 5px;
       `
       );

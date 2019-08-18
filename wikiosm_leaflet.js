@@ -146,7 +146,9 @@ async function load_tributaries_wiki(article) {
     article
   )}&sites=${lang}wiki&props=sitelinks&sitefilter=enwiki&format=json&normalize=true`;
   const data = await jsonp(url);
-  return await load_tributaries_overpass(Object.keys(data.entities)[0]);
+  const entity = Object.keys(data.entities)[0];
+  if(entity=="-1") return null;
+  return await load_tributaries_overpass(entity);
 }
 // load_tributaries_wiki("Essequibo River").then((layer) => layer.addTo(map));
 

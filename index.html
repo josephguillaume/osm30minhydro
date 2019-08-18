@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
@@ -46,11 +46,73 @@
         height: 100%;
         width: 100%;
       }
+
+      .overlay {
+        height: 100%;
+        width: 100%;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        background-color: rgb(0 0 0);
+        background-color: rgba(0 0 0 0.9);
+        overflow-x: hidden;
+      }
+
+      /* Position the content inside the overlay */
+      .overlay-content {
+        position: relative;
+        top: 25%; /* 25% from the top */
+        width: 100%; /* 100% width */
+        text-align: center; /* Centered text/links */
+        margin-top: 30px; /* 30px top margin to avoid conflict with the close button on smaller screens */
+      }
+
+      .overlay .closebtn {
+        position: absolute;
+        top: 20px;
+        right: 45px;
+        font-size: 60px;
+      }
+
+      .overlay a,
+      .overlay div {
+        text-decoration: none;
+        font-size: 36px;
+        color: #818181;
+      }
+
+      @media screen and (max-height: 450px) {
+        .overlay a,
+        . overlay div {
+          font-size: 20px;
+        }
+        .overlay .closebtn {
+          font-size: 40px;
+          top: 15px;
+          right: 35px;
+        }
+      }
     </style>
   </head>
 
   <body>
     <div id="map"></div>
+    <div id="loading" class="overlay">
+      <!-- Button to close the overlay navigation -->
+      <a
+        href="javascript:void(0)"
+        class="closebtn"
+        onclick="showLoading('none')"
+        >&times;</a
+      >
+
+      <!-- Overlay content -->
+      <div class="overlay-content">
+        <div>OSM30minHydro</div>
+        <div>Loading data</div>
+      </div>
+    </div>
 
     <script>
       var map = L.map("map").fitWorld();
@@ -63,10 +125,15 @@
       // create the tile layer with correct attribution
       // https://switch2osm.org/using-tiles/getting-started-with-leaflet/
       var osmUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-      openCurrentView = (e) => {
-        window.open(`https://www.openstreetmap.org/#map=${map.getZoom()}/${map.getCenter().lat}/${map.getCenter().lng}`,"_blank");
+      openCurrentView = e => {
+        window.open(
+          `https://www.openstreetmap.org/#map=${map.getZoom()}/${
+            map.getCenter().lat
+          }/${map.getCenter().lng}`,
+          "_blank"
+        );
         e.preventDefault();
-      }
+      };
       var osmAttrib =
         'Map data © <a href="https://openstreetmap.org" onClick="openCurrentView(event);">OpenStreetMap</a> contributors';
       var osm = L.tileLayer(osmUrl, {
@@ -75,21 +142,21 @@
         attribution: osmAttrib
       }).addTo(map);
 
-      function isBasinKnown(basin_name){
-		  return basin_wiki.some(x => x[1].startsWith(basin_name))
-	  }
+      function isBasinKnown(basin_name) {
+        return basin_wiki.some(x => x[1] && x[1].startsWith(basin_name));
+      }
 
       function select_basin(basin_id) {
-        if(
-            typeof basin_id != "undefined" ||
-            isNaN(basin_id) &&
-            !isBasinKnown(basin_id)
-        ){
+        if (
+          typeof basin_id == "string" &&
+          isNaN(basin_id) &&
+          !isBasinKnown(basin_id)
+        ) {
           load_tributaries_wiki(basin_id).then(layer => {
             layer.addTo(map, "Tributaries");
             map.fitBounds(layer.getBounds());
           });
-		}
+        }
         if (
           typeof basin_id == "undefined" ||
           isNaN(basin_id) ||
@@ -125,11 +192,15 @@
         highlightSelectedBasin(mapLayers, basin_id);
       }
 
-      load_ddm30_basins(mapLayers, select_basin);
+      load_ddm30_basins(mapLayers, select_basin).then(x => showLoading("none"));
 
       get_basin_wiki()
         .then(x => (window.basin_wiki = x))
         .then(x => setupSelectionLabel(map));
+
+      function showLoading(display) {
+        document.getElementById("loading").style.display = display;
+      }
     </script>
   </body>
 </html>

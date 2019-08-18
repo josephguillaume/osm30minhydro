@@ -26,7 +26,7 @@ async function load_ddm30_basins(mapLayers, select_basin) {
     }
   });
 
-  await mapLayers.add(
+  await mapLayers.addToControl(
     L.vectorGrid
       .slicer(basins_topojson, {
         rendererFactory: L.canvas.tile,
@@ -152,12 +152,10 @@ function setupSelectionLabel(map) {
         font-size: 16px;
         background-color: white;
         height: 80px;
-        max-width: 400px;
-        width: 100%;
         padding: 5px;
       `
       );
-      div.innerHTML = `River basin: <input id=basin style="font-size:16px" onChange="select_basin(document.getElementById('basin').value)" size=20></input>
+      div.innerHTML = `River basin: <input id=basin style="font-size:16px" onChange="select_basin(document.getElementById('basin').value)" size=15></input>
       <div id=wiki></div>
       Min stream order: <input id="strahler_min" type="number" value=1 style="width: 3em" title="Minimum Strahler number"
         onChange="mapLayers.basin_min_strahler=document.getElementById('strahler_min').value;load_basin_ddm(mapLayers,mapLayers.selected_basin_id);" size=3></input>`;

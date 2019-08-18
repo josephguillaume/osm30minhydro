@@ -75,7 +75,21 @@
         attribution: osmAttrib
       }).addTo(map);
 
+      function isBasinKnown(basin_name){
+		  return basin_wiki.some(x => x[1].startsWith(basin_name))
+	  }
+
       function select_basin(basin_id) {
+        if(
+            typeof basin_id != "undefined" ||
+            isNaN(basin_id) &&
+            !isBasinKnown(basin_id)
+        ){
+          load_tributaries_wiki(basin_id).then(layer => {
+            layer.addTo(map, "Tributaries");
+            map.fitBounds(layer.getBounds());
+          });
+		}
         if (
           typeof basin_id == "undefined" ||
           isNaN(basin_id) ||
